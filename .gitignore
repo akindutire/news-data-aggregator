@@ -23,3 +23,7 @@ composer.lock
 Homestead.json
 Homestead.yaml
 Thumbs.db
+package-lock.json
+yarn-error.log
+yarn.lock
+.editorconfig
