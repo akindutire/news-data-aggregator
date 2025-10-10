@@ -63,3 +63,17 @@ The Laravel framework is open-sourced software licensed under the [MIT license](
 ## App Design
 
 [App thought process on excalidraw](https://excalidraw.com/#json=i3gfvLLLY0KisGEnNoaI8,qhyYemZWVOvYKeFeafCa1w)
+
+## Run aggregator
+
+```
+php artisan queue:work --queue=default,high,low
+
+```
+
+OR
+
+```
+php artisan aggregate:news
+
+```
