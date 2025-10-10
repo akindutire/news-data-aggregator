@@ -4,81 +4,95 @@ namespace App\Models\ValueObject;
 
 class NewsVO
 {
-    private string $title;
-    private string $content;
-    private string $author;
-    private \DateTime $publishedAt;
-    private string $url;
-    private string $source;
-    private string $remoteSource;
-    private string $description;
-    private string $remoteId;
-    private string $imageUrl;
-    private string $category;
-    private string $language;
+    public string $title;
+    public string $content;
+    public string $author;
+    public \DateTime $publishedAt;
+    public string $url;
+    public string $source;
+    public string $remoteSource;
+    public string $description;
+    public string $remoteId;
+    public string $imageUrl;
+    public string $category;
+    public string $language;
 
-    public function __construct(array $data)
+
+    public function __set(string $property, $value): void
     {
-        $this->title = $data['title'] ?? '';
-        $this->content = $data['content'] ?? '';
-        $this->author = $data['author'] ?? 'Unknown';
-        $this->publishedAt = isset($data['publishedAt']) ? new \DateTime($data['publishedAt']) : new \DateTime();
-        $this->url = $data['url'] ?? '';
-        $this->source = $data['source']['name'] ?? 'Unknown';
-        $this->remoteSource = $data['remoteSource'] ?? 'Unknown';
-        $this->description = $data['description'] ?? '';
-        $this->remoteId = $data['remoteId'] ?? '';
-        $this->imageUrl = $data['imageUrl'] ?? '';
-        $this->category = $data['category'] ?? 'general';
-        $this->language = $data['language'] ?? 'en';
+        throw new \BadMethodCallException("Cannot set property {$property} directly. Use setter methods instead.");
     }
 
-    public function getTitle(): string
+    // Setter methods (chainable)
+    public function setTitle(?string $title): self
     {
-        return $this->title;
+        $this->title = $title ?? '';
+        return $this;
     }
-    public function getContent(): string
+
+    public function setContent(?string $content): self
     {
-        return $this->content;
+        $this->content = $content ?? '';
+        return $this;
     }
-    public function getAuthor(): string
+
+    public function setAuthor(?string $author): self
     {
-        return $this->author;
+        $this->author = $author ?? 'Unknown';
+        return $this;
     }
-    public function getPublishedAt(): \DateTime
+
+    public function setPublishedAt(?\DateTime $publishedAt): self
     {
-        return $this->publishedAt;
+        $this->publishedAt = $publishedAt ?? new \DateTime();
+        return $this;
     }
-    public function getUrl(): string
+
+    public function setUrl(?string $url): self
     {
-        return $this->url;
+        $this->url = $url ?? '';
+        return $this;
     }
-    public function getSource(): string
+
+    public function setSource(?string $source): self
     {
-        return $this->source;
+        $this->source = $source ?? 'Unknown';
+        return $this;
     }
-    public function getRemoteSource(): string
+
+    public function setRemoteSource(?string $remoteSource): self
     {
-        return $this->remoteSource;
+        $this->remoteSource = $remoteSource ?? 'Unknown';
+        return $this;
     }
-    public function getDescription(): string
+
+    public function setDescription(?string $description): self
     {
-        return $this->description;
+        $this->description = $description ?? '';
+        return $this;
     }
-    public function getRemoteId(): string
+
+    public function setRemoteId(?string $remoteId): self
     {
-        return $this->remoteId;
+        $this->remoteId = $remoteId ?? '';
+        return $this;
     }
-    public function getImageUrl(): string
+
+    public function setImageUrl(?string $imageUrl): self
     {
-        return $this->imageUrl;
+        $this->imageUrl = $imageUrl ?? '';
+        return $this;
     }
-    public function getCategory(): string
+
+    public function setCategory(?string $category): self
     {
-        return $this->category;
+        $this->category = $category ?? 'general';
+        return $this;
     }
-    public function getLanguage(): string
+
+    public function setLanguage(?string $language): self
     {
-        return $this->language;
+        $this->language = $language ?? 'en';
+        return $this;
     }
 }
