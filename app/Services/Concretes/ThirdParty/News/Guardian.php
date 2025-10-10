@@ -59,7 +59,8 @@ class Guardian extends \App\Services\Abstracts\AbstractNewsSource {
         } while ($page < $totalPages);
 
         // Create or Update state
-        $this->updateOrchestrationState($page);
+        if(count($dataSet) > 0)
+            $this->updateOrchestrationState($page);
 
         // filter/clean data
         $dataSet = $this->extractFeatures($dataSet);
