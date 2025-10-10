@@ -53,7 +53,7 @@ class Guardian extends \App\Services\Abstracts\AbstractNewsSource {
             $totalPages = $response->json('response.pages', 1);
             $page++;
 
-            if($property->maxItems > 0 && count($dataSet) >= $property->maxItems) {
+            if($property?->maxItems??0 > 0 && count($dataSet) >= $property?->maxItems??0) {
                 break;
             }
         } while ($page < $totalPages);
