@@ -74,7 +74,7 @@ class NewsVO
 
     public function setRemoteId(?string $remoteId): self
     {
-        $this->remoteId = $remoteId ?? '';
+        $this->remoteId = md5($remoteId) ?? md5(uniqid());
         return $this;
     }
 
