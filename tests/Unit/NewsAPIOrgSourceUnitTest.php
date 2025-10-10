@@ -5,10 +5,13 @@ namespace Tests\Unit;
 use App\PossibleNewsSource;
 use App\Services\Contracts\OrchestrateProps;
 use App\Services\Factories\NewsSourceFactory;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class NewsAPIOrgSourceUnitTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_newsapi_news_can_fetch_data(): void
     {
         $this->assertContains(PossibleNewsSource::NEWSAPIORG->value, config('innoscripta.supported_news_sources'));

@@ -5,12 +5,15 @@ namespace Tests\Unit;
 use App\PossibleNewsSource;
 use App\Services\Contracts\OrchestrateProps;
 use App\Services\Factories\NewsSourceFactory;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\App;
 // use PHPUnit\Framework\TestCase;
 use Tests\TestCase;
 
 class Guardian extends TestCase
 {
+    use RefreshDatabase;
+
     /**
      * A basic unit test example.
      */
@@ -18,8 +21,8 @@ class Guardian extends TestCase
     {
         $this->assertContains(PossibleNewsSource::GUARDIAN->value, config('innoscripta.supported_news_sources'));
 
-        $guardianNews = (new NewsSourceFactory())->make(PossibleNewsSource::GUARDIAN->value);
-        $response = $guardianNews->fetchByPage(1,10);
+        $source = (new NewsSourceFactory())->make(PossibleNewsSource::GUARDIAN->value);
+        $response = $source->fetchByPage(1,10);
         $data = $response->json('response.results', []);
 
         $this->assertIsArray($data);
@@ -30,21 +33,21 @@ class Guardian extends TestCase
     {
         $this->assertContains(PossibleNewsSource::GUARDIAN->value, config('innoscripta.supported_news_sources'));
 
-        $guardianNews = (new NewsSourceFactory())->make(PossibleNewsSource::GUARDIAN->value);
-        $response = $guardianNews->fetchByPage(1,10);
+        $source = (new NewsSourceFactory())->make(PossibleNewsSource::GUARDIAN->value);
+        $response = $source->fetchByPage(1,10);
         $data = $response->json('response.results', []);
 
         $this->assertIsArray($data);
         $this->assertNotEmpty($data);
 
-        $mappedData = $guardianNews->extractFeatures($data);
+        $mappedData = $source->extractFeatures($data);
 
         $this->assertIsArray($mappedData);
         $this->assertNotEmpty($mappedData);
 
         //test 1 of the items has the right keys
         $item = $mappedData[0];
-        $features = $guardianNews->getFeaturesToExtract();
+        $features = $source->getFeaturesToExtract();
         foreach($features as $feature) {
             $this->assertArrayHasKey($feature, $item);
         }
@@ -54,12 +57,12 @@ class Guardian extends TestCase
     {
         $this->assertContains(PossibleNewsSource::GUARDIAN->value, config('innoscripta.supported_news_sources'));
 
-        $guardianNews = (new NewsSourceFactory())->make(PossibleNewsSource::GUARDIAN->value);
+        $source = (new NewsSourceFactory())->make(PossibleNewsSource::GUARDIAN->value);
 
         $props = new OrchestrateProps;
         $props->maxItems = 5;
         $props->pageSize = 5;
-        $adaptedData = $guardianNews->orchestrate($props);
+        $adaptedData = $source->orchestrate($props);
 
         $this->assertIsArray($adaptedData);
         $this->assertNotEmpty($adaptedData);

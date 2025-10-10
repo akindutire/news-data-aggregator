@@ -5,12 +5,13 @@ use App\Models\ValueObject\NewsVO;
 use App\PossibleNewsSource;
 use App\Services\Contracts\OrchestrateProps;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 //api key = 2395a2308cc94540bac470245d498b58
 
 class NewsApiOrg extends \App\Services\Abstracts\AbstractNewsSource {
 
-    private string $baseUrl = "https://newsapi.org/v2/";
+    private string $baseUrl = "https://newsapi.org/v2";
     private $source = PossibleNewsSource::NEWSAPIORG->value;
 
     public function getSource(): string
@@ -24,6 +25,7 @@ class NewsApiOrg extends \App\Services\Abstracts\AbstractNewsSource {
 
     public function fetchByPage($page, $fetchSize) {
         return Http::get($this->baseUrl . "/everything", [
+            'domains' => implode(",", ['gizmodo.com','bbc.co.uk','techcrunch.com','thenextweb.com']),
             'from' => now()->subDay()->toDateString(),
             'apiKey' => env('NEWSAPIORG_API_KEY'),
             'pageSize' => $fetchSize,
@@ -41,7 +43,7 @@ class NewsApiOrg extends \App\Services\Abstracts\AbstractNewsSource {
             $property->pageSize = 50;
         }
 
-         // Pull data
+        // Pull data
         $dataSet = [];
 
         // Check orchestration state, get the last page fetched and continue from
@@ -51,9 +53,15 @@ class NewsApiOrg extends \App\Services\Abstracts\AbstractNewsSource {
 
         do{
             $response = $this->fetchByPage($page, $property?->pageSize??100);
-
-            if ($response->ok()){
+            if ($response->json('status') == "error") {
+                Log::error("Error fetching news: ".$response->json('message',  'An error occured'));
+                break;
+            }
+            if ($response->ok()) {
                 $dataSet = [...$dataSet, ...$response->json('articles', [])];
+            } else {
+                Log::error("Error fetching news02: ".$response->json('message',  'An error occured'));
+                break;
             }
 
             $totalPages = ceil($response->json('totalResults', 1)/($property?->pageSize??100));
@@ -74,7 +82,6 @@ class NewsApiOrg extends \App\Services\Abstracts\AbstractNewsSource {
 
         // filter/clean data
         $dataSet = $this->extractFeatures($dataSet);
-
 
 
         // adapt cleaned data to system features (news value object)

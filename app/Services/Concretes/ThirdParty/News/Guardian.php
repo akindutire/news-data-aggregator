@@ -6,12 +6,12 @@ use App\Models\ValueObject\NewsVO;
 use App\PossibleNewsSource;
 use App\Services\Contracts\OrchestrateProps;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class Guardian extends \App\Services\Abstracts\AbstractNewsSource {
 
     private string $baseUrl = "https://content.guardianapis.com";
     private $source = PossibleNewsSource::GUARDIAN->value;
-    private int $pageSize = 50;
 
 
     protected function getSource(): string {
@@ -35,7 +35,13 @@ class Guardian extends \App\Services\Abstracts\AbstractNewsSource {
      * @return NewsVO[]
      */
     public function orchestrate($property=null) : array {
-        // Pull data
+
+        if (is_null($property) ) {
+            $property = new OrchestrateProps;
+            $property->pageSize = 50;
+        }
+
+         // Pull data
         $dataSet = [];
 
         // Check orchestration state, get the last page fetched and continue from
@@ -44,23 +50,30 @@ class Guardian extends \App\Services\Abstracts\AbstractNewsSource {
         $page = $orchState?->last_fetched_page??1;
 
         do{
-            $response = $this->fetchByPage($page, $property?->pageSize??$this->pageSize);
+            $response = $this->fetchByPage($page, $property?->pageSize??100);
 
             if ($response->ok()){
                 $dataSet = [...$dataSet, ...$response->json('response.results', [])];
+            } else {
+                Log::error("Error fetching news02: ".$response->json('message', 'An error occured'));
+                break;
             }
 
             $totalPages = $response->json('response.pages', 1);
             $page++;
 
+            // Stop news fetch when limit reached or exceeded
             if($property?->maxItems??0 > 0 && count($dataSet) >= $property?->maxItems??0) {
                 break;
             }
         } while ($page < $totalPages);
 
         // Create or Update state
-        if(count($dataSet) > 0)
+        if(count($dataSet) > 0) {
             $this->updateOrchestrationState($page);
+        } else {
+            return [];
+        }
 
         // filter/clean data
         $dataSet = $this->extractFeatures($dataSet);
@@ -72,7 +85,7 @@ class Guardian extends \App\Services\Abstracts\AbstractNewsSource {
                     ->setTitle($item['webTitle'])
                     ->setPublishedAt(new \DateTime($item['webPublicationDate']))
                     ->setUrl($item['webUrl'])
-                    ->setSource($this->source)
+                    ->setSource($this->getSource())
                     ->setRemoteSource("")
                     ->setRemoteId($item['id'])
                     ->setCategory($item['sectionName'])
