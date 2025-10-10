@@ -3,7 +3,7 @@
 namespace Tests\Unit;
 
 use App\PossibleNewsSource;
-use App\Services\Contracts\OchestrateProps;
+use App\Services\Contracts\OrchestrateProps;
 use App\Services\Factories\NewsSourceFactory;
 use Illuminate\Support\Facades\App;
 // use PHPUnit\Framework\TestCase;
@@ -56,7 +56,7 @@ class Guardian extends TestCase
 
         $guardianNews = (new NewsSourceFactory())->make(PossibleNewsSource::GUARDIAN->value);
 
-        $props = new OchestrateProps;
+        $props = new OrchestrateProps;
         $props->maxItems = 5;
         $props->pageSize = 5;
         $adaptedData = $guardianNews->orchestrate($props);
