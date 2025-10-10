@@ -11,6 +11,7 @@ class NewsAggregatorService implements \App\Services\Contracts\AggregatorInterfa
     public function aggregate(): void {
         $sources = config('innoscripta.supported_news_sources', []);
 
+        //Compose closures for each source
         $closures = array_map(function($source) {
             return function() use ($source) {
                 $newsSource = (new \App\Services\Factories\NewsSourceFactory())->make($source);
@@ -22,21 +23,25 @@ class NewsAggregatorService implements \App\Services\Contracts\AggregatorInterfa
 
         Log::info("Aggregating news from all sources concurrently @ ".now()->toString());
         dump("Aggregating news from all sources concurrently @ ".now()->toString());
+
+        // Run closure concurrently
         $allNewsSourceResults = Concurrency::run(
             [
                 ...$closures
             ]
         );
 
+        // Merge all sources
         $allNewsSourceResults = array_merge(...$allNewsSourceResults);
 
-        Log::info("Aggregated news from all sources @ ".now()->toString(), ['total_sources' => count($sources)]);
-        dump("Aggregated news from all sources  @ ".now()->toString());
+        Log::info("Aggregated news from all sources @ ".now()->toString(), ['total_sources' => count($sources), 'total_news_fetched' => count($allNewsSourceResults) ]);
+        dump("Aggregated news from all sources  @ ".now()->toString()."/".implode(", ", ['total_sources=' .count($sources), 'total_news_fetched='. count($allNewsSourceResults) ]));
 
         //result is type array of NewsVO
         foreach ($allNewsSourceResults as $result) {
+
             //Save to news model
-            if ( !($result) instanceof \App\Models\ValueObject\NewsVO ) {
+            if ( !($result instanceof \App\Models\ValueObject\NewsVO ) ) {
                 continue;
             }
 
