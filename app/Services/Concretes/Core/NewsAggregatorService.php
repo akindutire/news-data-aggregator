@@ -1,5 +1,5 @@
 <?php
-namespace App\Services\Core;
+namespace App\Services\Concretes\Core;
 
 use App\Models\News;
 use Illuminate\Support\Facades\Concurrency;
@@ -15,11 +15,13 @@ class NewsAggregatorService implements \App\Services\Contracts\AggregatorInterfa
             return function() use ($source) {
                 $newsSource = (new \App\Services\Factories\NewsSourceFactory())->make($source);
                 if ($newsSource) {
-                    $newsSource->orchestrate();
+                    return $newsSource->orchestrate();
                 }
             };
         }, $sources);
 
+        Log::info("Aggregating news from all sources concurrently @ ".now()->toString());
+        dump("Aggregating news from all sources concurrently @ ".now()->toString());
         $allNewsSourceResults = Concurrency::run(
             [
                 ...$closures
@@ -28,7 +30,9 @@ class NewsAggregatorService implements \App\Services\Contracts\AggregatorInterfa
 
         $allNewsSourceResults = array_merge(...$allNewsSourceResults);
 
-        Log::info("Aggregated news from all sources", ['total_sources' => count($sources)]);
+        Log::info("Aggregated news from all sources @ ".now()->toString(), ['total_sources' => count($sources)]);
+        dump("Aggregated news from all sources  @ ".now()->toString());
+
         //result is type array of NewsVO
         foreach ($allNewsSourceResults as $result) {
             //Save to news model
