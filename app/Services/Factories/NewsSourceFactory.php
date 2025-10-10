@@ -16,8 +16,8 @@ class NewsSourceFactory
                 return App::make(\App\Services\Concretes\ThirdParty\News\NewYorkTimes::class);
             case PossibleNewsSource::GUARDIAN->value:
                 return App::make(\App\Services\Concretes\ThirdParty\News\Guardian::class);
-            case PossibleNewsSource::NEWSAPI->value:
-                return App::make(\App\Services\Concretes\ThirdParty\News\NewsApi::class);
+            case PossibleNewsSource::NEWSAPIORG->value:
+                return App::make(\App\Services\Concretes\ThirdParty\News\NewsApiOrg::class);
             default:
                 throw new \InvalidArgumentException("Internal error: Missing module for source: {$sourceType}, contact support.");
         }
