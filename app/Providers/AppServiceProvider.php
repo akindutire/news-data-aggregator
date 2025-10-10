@@ -14,7 +14,7 @@ class AppServiceProvider extends ServiceProvider
     {
         //
 
-        $this->app->bind(\App\Services\Contracts\AggregatorInterface::class, \App\Services\Core\NewsAggregatorService::class);
+        $this->app->bind(\App\Services\Contracts\AggregatorInterface::class, \App\Services\Concretes\Core\NewsAggregatorService::class);
     }
 
     /**
