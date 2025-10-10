@@ -4,14 +4,19 @@ namespace App\Services\Concretes\ThirdParty\News;
 use App\Models\News;
 use App\Models\ValueObject\NewsVO;
 use App\PossibleNewsSource;
-use App\Services\Contracts\OchestrateProps;
+use App\Services\Contracts\OrchestrateProps;
 use Illuminate\Support\Facades\Http;
 
 class Guardian extends \App\Services\Abstracts\AbstractNewsSource {
 
     private string $baseUrl = "https://content.guardianapis.com";
-    private int $pageSize = 50;
     private $source = PossibleNewsSource::GUARDIAN->value;
+    private int $pageSize = 50;
+
+
+    protected function getSource(): string {
+        return $this->source;
+    }
 
     protected function featuresToExtract(): array {
         return ['webTitle', 'webPublicationDate', 'webUrl', 'sectionName', 'id'];
@@ -29,12 +34,17 @@ class Guardian extends \App\Services\Abstracts\AbstractNewsSource {
     /**
      * @return NewsVO[]
      */
-    public function orchestrate($property) : array {
+    public function orchestrate($property=null) : array {
         // Pull data
-        $page = 1;
         $dataSet = [];
+
+        // Check orchestration state, get the last page fetched and continue from
+        // This step would keep news up to date without extreme overfetching
+        $orchState = $this->orchestrationState();
+        $page = $orchState?->last_fetched_page??1;
+
         do{
-            $response = $this->fetchByPage($page, $this->pageSize??$property->pageSize);
+            $response = $this->fetchByPage($page, $property?->pageSize??$this->pageSize);
 
             if ($response->ok()){
                 $dataSet = [...$dataSet, ...$response->json('response.results', [])];
@@ -47,6 +57,9 @@ class Guardian extends \App\Services\Abstracts\AbstractNewsSource {
                 break;
             }
         } while ($page < $totalPages);
+
+        // Create or Update state
+        $this->updateOrchestrationState($page);
 
         // filter/clean data
         $dataSet = $this->extractFeatures($dataSet);
