@@ -54,9 +54,15 @@ class NewsVO
         return $this;
     }
 
-    public function setSource(?string $source): self
+    public function setSource(string $source): self
     {
-        $this->source = $source ?? 'Unknown';
+        if (empty($source)) {
+            throw new \InvalidArgumentException("Source cannot be empty.");
+        }
+        if(!in_array($source, array_map(fn($e) => $e->value, \App\PossibleNewsSource::cases()))) {
+            throw new \InvalidArgumentException("Invalid source provided.");
+        }
+        $this->source = $source;
         return $this;
     }
 
