@@ -6,6 +6,7 @@ use App\PossibleNewsSource;
 use App\Services\Contracts\OrchestrateProps;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class NewYorkTimes extends \App\Services\Abstracts\AbstractNewsSource
 {
@@ -49,12 +50,17 @@ class NewYorkTimes extends \App\Services\Abstracts\AbstractNewsSource
         $page = $orchState?->last_fetched_page??1;
 
         do{
-            $response = $this->fetchByPage($page, $property?->pageSize??100);
+            try{
+                $response = $this->fetchByPage($page, $property?->pageSize??100);
 
-            if ($response->ok()) {
-                $dataSet = [...$dataSet, ...$response->json('results', [])];
-            } else {
-                Log::error("Error fetching news02: ".$response->json('message',  'An error occured'));
+                if ($response->ok()) {
+                    $dataSet = [...$dataSet, ...$response->json('results', [])];
+                } else {
+                    Log::error("Error fetching news02: ".$response->json('message',  'An error occured'));
+                    break;
+                }
+            } catch (Throwable $t) {
+                Log::error($t);
                 break;
             }
 

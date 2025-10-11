@@ -6,6 +6,7 @@ use App\PossibleNewsSource;
 use App\Services\Contracts\OrchestrateProps;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class NewsApiOrg extends \App\Services\Abstracts\AbstractNewsSource {
 
@@ -50,17 +51,23 @@ class NewsApiOrg extends \App\Services\Abstracts\AbstractNewsSource {
         $page = $orchState?->last_fetched_page??1;
 
         do{
-            $response = $this->fetchByPage($page, $property?->pageSize??100);
-            if ($response->json('status') == "error") {
-                Log::error("Error fetching news: ".$response->json('message',  'An error occured'));
+            try{
+                $response = $this->fetchByPage($page, $property?->pageSize??100);
+                if ($response->json('status') == "error") {
+                    Log::error("Error fetching news: ".$response->json('message',  'An error occured'));
+                    break;
+                }
+                if ($response->ok()) {
+                    $dataSet = [...$dataSet, ...$response->json('articles', [])];
+                } else {
+                    Log::error("Error fetching news02: ".$response->json('message',  'An error occured'));
+                    break;
+                }
+            } catch (Throwable $t) {
+                Log::error($t);
                 break;
             }
-            if ($response->ok()) {
-                $dataSet = [...$dataSet, ...$response->json('articles', [])];
-            } else {
-                Log::error("Error fetching news02: ".$response->json('message',  'An error occured'));
-                break;
-            }
+
 
             $totalPages = ceil($response->json('totalResults', 1)/($property?->pageSize??100));
             $page++;
