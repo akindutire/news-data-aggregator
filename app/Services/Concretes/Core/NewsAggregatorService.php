@@ -83,6 +83,10 @@ class NewsAggregatorService implements \App\Services\Contracts\AggregatorInterfa
             return $q->where('source', $opts->source);
         });
 
+         $baseQuery->when( is_array($opts->source) && count($opts->source) > 0, function($q) use ($opts) {
+            return $q->whereIn('source', $opts->source);
+        });
+
         $baseQuery->when( !empty($opts->title), function($q) use ($opts) {
             return $q->where('title', 'LIKE', '%'.$opts->title.'%')->orWhere('content', 'LIKE', '%'.$opts->title.'%');
         });
@@ -92,7 +96,7 @@ class NewsAggregatorService implements \App\Services\Contracts\AggregatorInterfa
         });
 
         $baseQuery->when( is_array($opts->category) && count($opts->category) > 0, function($q) use ($opts) {
-            return $q->whereIn('source', $opts->category);
+            return $q->whereIn('category', $opts->category);
         });
 
         $baseQuery->when( !empty($opts->fromDate), function($q) use ($opts) {
@@ -104,20 +108,26 @@ class NewsAggregatorService implements \App\Services\Contracts\AggregatorInterfa
         });
 
         $baseQuery->when( is_array($opts->author) && count($opts->author) > 0, function($q) use ($opts) {
-            return $q->whereIn('author', $opts->author);
+            $authors = $opts->author;
+            return $q->where(function($iq) use ($authors) {
+                foreach($authors as $author)  {
+                    $iq->orWhere('author', 'LIKE', '%'.$author.'%');
+                }
+            });
+
         });
 
-        $baseQuery->when( is_string($opts->author) && !empty($opts->author), function($q) use ($opts) {
-            return $q->where('author', 'LIKE', '%'.$opts->author.'%');
-        });
-
-        $baseQuery->when( $opts->distinct, function($q) use ($opts) {
+        $baseQuery->when( $opts->distinct, function($q) {
             return $q->distinct();
         });
 
-        $baseQuery->when( is_array($opts->orderBy ) && count($opts->orderBy) > 0, function($q) use ($opts) {
+        $baseQuery->when( !empty($opts->orderBy), function($q) use ($opts) {
             return $q->orderBy($opts->orderBy, $opts->orderByDir);
         });
+
+        // Log the evaluated query string
+        // Log::debug('Query SQL: ' . $baseQuery->toSql());
+        // Log::debug('Query Bindings: ' . json_encode($baseQuery->getBindings()));
 
         if ($opts->shouldPaginate) {
             return $baseQuery->paginate($opts->perPage??25, page: $opts->page);

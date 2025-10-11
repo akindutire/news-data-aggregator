@@ -95,7 +95,7 @@ class NewYorkTimes extends \App\Services\Abstracts\AbstractNewsSource
                     ->setRemoteSource($item['source'])
                     ->setRemoteId($item['slug_name'])
                     ->setCategory($item['section'])
-                    ->setAuthor($item['byline'])
+                    ->setAuthor(preg_replace('/^By\s+/i', '', $item['byline']))
                     ->setContent("")
                     ->setDescription($item['abstract'])
                     ->setImageUrl('');
