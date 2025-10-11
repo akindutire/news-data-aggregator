@@ -7,8 +7,6 @@ use App\Services\Contracts\OrchestrateProps;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-//api key = 2395a2308cc94540bac470245d498b58
-
 class NewsApiOrg extends \App\Services\Abstracts\AbstractNewsSource {
 
     private string $baseUrl = "https://newsapi.org/v2";
