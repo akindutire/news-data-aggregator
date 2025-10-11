@@ -92,7 +92,7 @@ class NewsVO
 
     public function setCategory(?string $category): self
     {
-        $this->category = $category ?? 'general';
+        $this->category = strtolower($category) ?? 'general';
         return $this;
     }
 
