@@ -2,14 +2,19 @@
 namespace App\Services\Concretes\Core;
 
 use App\Models\News;
+use App\Services\Contracts\FetchOpts;
 use Illuminate\Support\Facades\Concurrency;
 use Illuminate\Support\Facades\Log;
 
 class NewsAggregatorService implements \App\Services\Contracts\AggregatorInterface
 {
 
-    public function aggregate(): void {
-        $sources = config('innoscripta.supported_news_sources', []);
+    public function aggregate(array $sources = []): void {
+
+        if(count($sources) == 0)
+            $sources = config('innoscripta.supported_news_sources', []);
+        else
+            $sources = array_intersect($sources, config('innoscripta.supported_news_sources', []));
 
         //Compose closures for each source
         $closures = array_map(function($source) {
@@ -62,4 +67,63 @@ class NewsAggregatorService implements \App\Services\Contracts\AggregatorInterfa
             ]);
         }
     }
+
+    /** Central logic to fetch from news
+     * @return Illuminate\Database\Eloquent\Collection<int,App\Models\News>|Illuminate\Pagination\LengthAwarePaginator
+    */
+    public function fetch(?FetchOpts $opts) {
+
+        $baseQuery = News::query();
+
+        $baseQuery->when(is_array($opts->fields) && count($opts->fields) > 0, function($q) use ($opts) {
+            return $q->select($opts->fields);
+        });
+
+        $baseQuery->when( !empty($opts->source), function($q) use ($opts) {
+            return $q->where('source', $opts->source);
+        });
+
+        $baseQuery->when( !empty($opts->title), function($q) use ($opts) {
+            return $q->where('title', 'LIKE', '%'.$opts->title.'%')->orWhere('content', 'LIKE', '%'.$opts->title.'%');
+        });
+
+        $baseQuery->when( is_string($opts->category) && !empty($opts->category), function($q) use ($opts) {
+            return $q->where('category','LIKE', '%'.$opts->category.'%');
+        });
+
+        $baseQuery->when( is_array($opts->category) && count($opts->category) > 0, function($q) use ($opts) {
+            return $q->whereIn('source', $opts->category);
+        });
+
+        $baseQuery->when( !empty($opts->fromDate), function($q) use ($opts) {
+            return $q->where('published_at', '>=', $opts->fromDate);
+        });
+
+        $baseQuery->when( !empty($opts->toDate), function($q) use ($opts) {
+            return $q->where('published_at', '<=', $opts->toDate);
+        });
+
+        $baseQuery->when( is_array($opts->author) && count($opts->author) > 0, function($q) use ($opts) {
+            return $q->whereIn('author', $opts->author);
+        });
+
+        $baseQuery->when( is_string($opts->author) && !empty($opts->author), function($q) use ($opts) {
+            return $q->where('author', 'LIKE', '%'.$opts->author.'%');
+        });
+
+        $baseQuery->when( $opts->distinct, function($q) use ($opts) {
+            return $q->distinct();
+        });
+
+        $baseQuery->when( is_array($opts->orderBy ) && count($opts->orderBy) > 0, function($q) use ($opts) {
+            return $q->orderBy($opts->orderBy, $opts->orderByDir);
+        });
+
+        if ($opts->shouldPaginate) {
+            return $baseQuery->paginate($opts->perPage??25, page: $opts->page);
+        } else {
+            return $baseQuery->get();
+        }
+    }
+
 }
