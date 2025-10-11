@@ -62,15 +62,34 @@ class NewsController extends Controller
             $fetchOps->source = explode(',', $request->source);
         }
 
+        if( $request->has('orderBy') ) {
+            $fetchOps->orderBy = $request->orderBy;
+        } else {
+            $fetchOps->orderBy = 'published_at';
+            $fetchOps->orderByDir = 'DESC';
+        }
+
         if( $request->has('page') ) {
             $fetchOps->page = $request->page;
         }
 
-        $fetchOps->orderBy = 'published_at';
-        $fetchOps->orderByDir = 'DESC';
-        $fetchOps->perPage = 50;
+        if( $request->has('perPage') && $request->perPage > 0) {
+            $fetchOps->perPage = $request->perPage;
+        } else {
+            $fetchOps->perPage = 50;
+        }
 
+        if( $request->has('page') ) {
+            $fetchOps->page = $request->page;
+        }
         $results = $this->newsAggregator->fetch($fetchOps);
-        return response()->json(['message' => 'News fetched', 'data' => NewsResource::collection($results)], 200);
+
+        if ($fetchOps->shouldPaginate) {
+            return NewsResource::collection($results)->additional([
+                'message' => 'News fetched'
+            ]);
+        } else {
+            return response()->json(['message' => 'News fetched', 'data' => NewsResource::collection($results)], 200);
+        }
     }
 }
