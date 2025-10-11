@@ -69,12 +69,12 @@ php artisan test tests/Unit/NewYorkTimesSourceUnitTest.php
 
 ## Endpoints
 
-[GET] {{base_url}}/news/category
-[GET] {{base_url}}/news
+-   [GET] {{base_url}}/news/category
+-   [GET] {{base_url}}/news
 
 ## Sample news fetch
 
-{{base_url}}/news?from=20251007&category=food,politics,footbal&source=newyorktimes&to=20251010&author=Nyt+Cooking,Sue+Li
+-   [GET] {{base_url}}/news?from=20251007&category=food,politics,footbal&source=newyorktimes&to=20251010&author=Nyt+Cooking,Sue+Li
 
 ## Supported query parameters
 
