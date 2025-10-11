@@ -14,7 +14,7 @@ enum PossibleNewsSource: string
 
     public function isSupported(): bool {
         return match($this) {
-            self::NEWSAPIORG, self::GUARDIAN => true,
+            self::NEWSAPIORG, self::GUARDIAN, self::NEWYORKTIMES => true,
             default => false,
         };
     }
