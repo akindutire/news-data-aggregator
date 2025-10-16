@@ -28,3 +28,5 @@ package-lock.json
 yarn-error.log
 yarn.lock
 .editorconfig
+Backend Developer_Case*
+*.excalidraw
