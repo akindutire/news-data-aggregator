@@ -21,7 +21,7 @@ class Guardian extends TestCase
     {
         $this->assertContains(PossibleNewsSource::GUARDIAN->value, config('innoscripta.supported_news_sources'));
 
-        $source = (new NewsSourceFactory())->make(PossibleNewsSource::GUARDIAN->value);
+        $source = NewsSourceFactory::make(PossibleNewsSource::GUARDIAN->value);
         $response = $source->fetchByPage(1,10);
         $data = $response->json('response.results', []);
 
@@ -33,7 +33,7 @@ class Guardian extends TestCase
     {
         $this->assertContains(PossibleNewsSource::GUARDIAN->value, config('innoscripta.supported_news_sources'));
 
-        $source = (new NewsSourceFactory())->make(PossibleNewsSource::GUARDIAN->value);
+        $source = NewsSourceFactory::make(PossibleNewsSource::GUARDIAN->value);
         $response = $source->fetchByPage(1,10);
         $data = $response->json('response.results', []);
 
@@ -57,7 +57,7 @@ class Guardian extends TestCase
     {
         $this->assertContains(PossibleNewsSource::GUARDIAN->value, config('innoscripta.supported_news_sources'));
 
-        $source = (new NewsSourceFactory())->make(PossibleNewsSource::GUARDIAN->value);
+        $source = NewsSourceFactory::make(PossibleNewsSource::GUARDIAN->value);
 
         $props = new OrchestrateProps;
         $props->maxItems = 5;

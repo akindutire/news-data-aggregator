@@ -16,7 +16,7 @@ class NewsAPIOrgSourceUnitTest extends TestCase
     {
         $this->assertContains(PossibleNewsSource::NEWSAPIORG->value, config('innoscripta.supported_news_sources'));
 
-        $source = (new NewsSourceFactory())->make(PossibleNewsSource::NEWSAPIORG->value);
+        $source = NewsSourceFactory::make(PossibleNewsSource::NEWSAPIORG->value);
         $response = $source->fetchByPage(1,10);
         $data = $response->json('articles', []);
 
@@ -28,7 +28,7 @@ class NewsAPIOrgSourceUnitTest extends TestCase
     {
         $this->assertContains(PossibleNewsSource::NEWSAPIORG->value, config('innoscripta.supported_news_sources'));
 
-        $source = (new NewsSourceFactory())->make(PossibleNewsSource::NEWSAPIORG->value);
+        $source = NewsSourceFactory::make(PossibleNewsSource::NEWSAPIORG->value);
         $response = $source->fetchByPage(1,10);
         $data = $response->json('articles', []);
 
@@ -52,7 +52,7 @@ class NewsAPIOrgSourceUnitTest extends TestCase
     {
         $this->assertContains(PossibleNewsSource::NEWSAPIORG->value, config('innoscripta.supported_news_sources'));
 
-        $source = (new NewsSourceFactory())->make(PossibleNewsSource::NEWSAPIORG->value);
+        $source = NewsSourceFactory::make(PossibleNewsSource::NEWSAPIORG->value);
 
         $props = new OrchestrateProps;
         $props->maxItems = 5;
