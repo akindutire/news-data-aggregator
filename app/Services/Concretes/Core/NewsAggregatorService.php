@@ -19,7 +19,7 @@ class NewsAggregatorService implements \App\Services\Contracts\AggregatorInterfa
         //Compose closures for each source
         $closures = array_map(function($source) {
             return function() use ($source) {
-                $newsSource = (new \App\Services\Factories\NewsSourceFactory())->make($source);
+                $newsSource = \App\Services\Factories\NewsSourceFactory::make($source);
                 if ($newsSource) {
                     return $newsSource->orchestrate();
                 }
